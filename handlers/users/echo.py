@@ -11,7 +11,8 @@ from aiogram.types import  InputMediaPhoto, InputMediaVideo
 
 async def echo_bot(message:types.Message):
     url = message.text.strip()
-    new_url = f"https://www.instagram.com/stories/{url}/"
+    print(url, url[1:])
+    new_url = f"https://www.instagram.com/stories/{url[1:]}/"
     info = await message.answer("Sorov Bajarilmoqda Kuting...")
     try:
         response = requests.post("http://95.169.205.213:8080/instagram/media", data={"url": new_url})

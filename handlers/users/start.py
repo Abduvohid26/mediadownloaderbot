@@ -21,9 +21,11 @@ async def get_content(message:types.Message):
     response = requests.post("http://95.169.205.213:8080/instagram/media", data={"url": url})
     data = response.json()
     print(data, 'data')
+    if data["type"] == "album":
+        print("album")
     try:
         if data["error"] == True:
-            await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring")
+            await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring1")
             return
         if data["type"] == "image":
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_PHOTO)
@@ -32,6 +34,7 @@ async def get_content(message:types.Message):
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
             await message.answer_video(data["download_url"])
         elif data["type"] == "album":
+            print("salom")
             media_group = []
             for media in data["medias"]:
                 if media["type"] == "video":
@@ -44,6 +47,7 @@ async def get_content(message:types.Message):
         elif data["type"] == "stories":
             media_group = []
             for media in data["medias"]:
+                print("salom")
                 media_group.append(InputMediaVideo(media=media["download_url"]))
             await bot.send_chat_action(chat_id=message.chat.id, action="upload_video")
             await message.answer_media_group(media_group)
