@@ -48,8 +48,13 @@ async def get_content(message:types.Message):
                     media_group.append(InputMediaVideo(media=media["download_url"]))
                 else:
                     media_group.append(InputMediaPhoto(media=media["download_url"]))
-            await bot.send_chat_action(chat_id=message.chat.id, action="upload_video")
-            await message.answer_media_group(media_group)
+
+                if len(media_group) == 10:
+                    await message.answer_media_group(media_group)
+                    media_group = []
+
+            if media_group:
+                await message.answer_media_group(media_group)
     except Exception as e:
         print("error", e)
         await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring")
