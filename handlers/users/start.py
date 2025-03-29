@@ -44,19 +44,33 @@ async def get_content(message:types.Message):
             await message.answer_media_group(media_group)
         elif data["type"] == "stories":
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
-            media_group = []
+
+            photo_group = []  # Rasmlar uchun
+            video_group = []  # Videolar uchun
+
             for media in data["medias"]:
                 if media["type"] == "video":
-                    media_group.append(InputMediaVideo(media=media["download_url"]))
+                    video_group.append(InputMediaVideo(media=media["download_url"]))
                 else:
-                    media_group.append(InputMediaPhoto(media=media["download_url"]))
+                    photo_group.append(InputMediaPhoto(media=media["download_url"]))
 
-                if len(media_group) == 10:
-                    await message.answer_media_group(media_group)
-                    media_group = []
+                # Agar videolar 10 taga yetsa, jo‘natib tashlaymiz
+                if len(video_group) == 10:
+                    await message.answer_media_group(video_group)
+                    video_group = []
 
-            if media_group:
-                await message.answer_media_group(media_group)
+                # Agar rasmlar 10 taga yetsa, jo‘natib tashlaymiz
+                if len(photo_group) == 10:
+                    await message.answer_media_group(photo_group)
+                    photo_group = []
+
+            # Qolgan videolarni jo‘natish
+            if video_group:
+                await message.answer_media_group(video_group)
+
+            # Qolgan rasmlarni jo‘natish
+            if photo_group:
+                await message.answer_media_group(photo_group)
     except Exception as e:
         print("error", e)
         await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring")
