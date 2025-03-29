@@ -20,9 +20,6 @@ async def get_content(message:types.Message):
     info = await message.answer("Sorov Bajarilmoqda Kuting...")
     response = requests.post("http://95.169.205.213:8080/instagram/media", data={"url": url})
     data = response.json()
-    print(data, 'data')
-    if data["type"] == "album":
-        print("album")
     try:
         if data["error"] == True:
             await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring1")
@@ -34,7 +31,6 @@ async def get_content(message:types.Message):
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
             await message.answer_video(data["download_url"])
         elif data["type"] == "album":
-            print("salom")
             media_group = []
             for media in data["medias"]:
                 if media["type"] == "video":
@@ -54,7 +50,7 @@ async def get_content(message:types.Message):
             await bot.send_chat_action(chat_id=message.chat.id, action="upload_video")
             await message.answer_media_group(media_group)
     except Exception as e:
-        print(e)
+        print("error", e)
         await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring")
     finally:
         await info.delete()
