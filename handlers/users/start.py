@@ -20,6 +20,7 @@ async def get_content(message:types.Message):
     info = await message.answer("Sorov Bajarilmoqda Kuting...")
     response = requests.post("http://95.169.205.213:8080/instagram/media", data={"url": url})
     data = response.json()
+    print(data)
     try:
         if data["error"] == True:
             await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring1")
