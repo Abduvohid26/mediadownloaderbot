@@ -47,8 +47,10 @@ async def get_content(message:types.Message):
         elif data["type"] == "stories":
             media_group = []
             for media in data["medias"]:
-                print("salom")
-                media_group.append(InputMediaVideo(media=media["download_url"]))
+                if media["type"] == "video":
+                    media_group.append(InputMediaVideo(media=media["download_url"]))
+                else:
+                    media_group.append(InputMediaPhoto(media=media["download_url"]))
             await bot.send_chat_action(chat_id=message.chat.id, action="upload_video")
             await message.answer_media_group(media_group)
     except Exception as e:
