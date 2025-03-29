@@ -32,6 +32,7 @@ async def get_content(message:types.Message):
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
             await message.answer_video(data["download_url"])
         elif data["type"] == "album":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
             media_group = []
             for media in data["medias"]:
                 if media["type"] == "video":
@@ -42,6 +43,7 @@ async def get_content(message:types.Message):
             await bot.send_chat_action(chat_id=message.chat.id, action="upload_photo")
             await message.answer_media_group(media_group)
         elif data["type"] == "stories":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
             media_group = []
             for media in data["medias"]:
                 if media["type"] == "video":
