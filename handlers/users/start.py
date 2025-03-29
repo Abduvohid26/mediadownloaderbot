@@ -43,9 +43,13 @@ async def get_content(message:types.Message):
                 else:
                     photo_group.append(InputMediaPhoto(media=media["download_url"], caption="Photos"))
 
-                if len(media_group) == 10:
-                    await message.answer_media_group(media_group)
-                    media_group = [] 
+                if len(video_group) == 10:
+                    await message.answer_media_group(video_group)
+                    video_group = [] 
+
+                if len(photo_group) == 10:
+                    await message.answer_media_group(photo_group)
+                    photo_group = [] 
 
             if video_group:
                 await message.answer_media_group(video_group)
