@@ -53,10 +53,11 @@
 #         await info.delete()
 
 import httpx
-from aiogram import Bot, types
+from aiogram import Bot, types, F
 from aiogram.types import InputMediaVideo, InputMediaPhoto
 from aiogram.enums.chat_action import ChatAction
 from loader import dp, bot
+@dp.message(F.text)
 
 async def echo_bot(message: types.Message):
     url = message.text.strip()
@@ -66,7 +67,7 @@ async def echo_bot(message: types.Message):
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post("http://95.169.205.213:8080/instagram/media", data={"url": new_url}, timeout=15)
+            response = await client.post("https://videoyukla.uz/instagram/media", data={"url": new_url}, timeout=15)
             data = response.json()
         
         print(data)
