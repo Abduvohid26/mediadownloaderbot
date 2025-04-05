@@ -22,7 +22,7 @@ async def get_content(message: types.Message):
     info = await message.answer("Sorov Bajarilmoqda Kuting...")
 
     async with httpx.AsyncClient() as client:
-        response = await client.post("http://95.169.205.213:8080/instagram/media", data={"url": url}, timeout=15)
+        response = await client.post("https://videoyukla.uz/instagram/media", data={"url": url}, timeout=15)
         data = response.json()
 
 
@@ -63,62 +63,11 @@ async def get_content(message: types.Message):
         await info.delete()
 
 
-from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-class YtVideoState(StatesGroup):
-    start = State()
 
 
-@dp.message(F.text, YtCheckLink())
-async def get_content(message: types.Message, state: FSMContext):
-    url = message.text.strip()
-    info = await message.answer("Sorov Bajarilmoqda Kuting...")
+from aiogram.filters import Command
 
-    response = requests.post("http://95.169.205.213:8080/yt/media", data={"url": url})
-    data = response.json()
-
-    if not data.get("error"):
-        await info.delete()
-        await state.update_data({"data": data})
-
-        btn = InlineKeyboardBuilder()
-        btn.button(text="Video", callback_data="data_video")
-        btn.button(text="Audio", callback_data="data_audio")
-        btn.adjust(2)
-
-        await message.answer_photo(
-            photo=data["thumbnail"],
-            caption=data["title"],
-            reply_markup=btn.as_markup()
-        )
-        await state.set_state(YtVideoState.start)
-    else:
-        await info.delete()
-        await message.answer("Xatolik yuz berdi, qayta urinib ko'ring.")
-
-
-@dp.callback_query(YtVideoState.start, lambda query: query.data.startswith("data_"))
-async def get_and_(call: types.CallbackQuery, state: FSMContext):
-    res = call.data.split("_")[-1]
-    state_data = await state.get_data()
-    medias = state_data.get("data", {}).get("medias", [])
-    title = state_data.get("data", {}).get("title")
-    if not medias:
-        await call.answer("Media topilmadi!")
-        return
-
-    for data in medias:
-        if (
-                (res == "video" and data.get("type") == "video" and not data.get("is_audio")) or
-                (res == "audio" and data.get("type") == "audio" and data.get("is_audio"))
-        ):
-            if res == "video":
-                await call.message.answer_video(data["url"], caption=title)
-            else:
-                await call.message.answer_audio(data["url"], caption=title)
-            return
-
-    await call.answer("Mos media topilmadi!")
-    await state.clear()
+@dp.message(Command("check"))
+async def check(message: types.Message):
+    
+    await message.answer_video(video=f"")
