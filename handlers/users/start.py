@@ -38,9 +38,9 @@ async def get_content(message: types.Message):
 
         elif data["type"] == "video":
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
-            await message.answer_video(data["download_url"])
+            await message.answer_video(data["medias"][0]["download_url"])
 
-        elif data["type"] in ["album", "stories"]:
+        elif data["type"]  == "album":
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
 
             media_group = []

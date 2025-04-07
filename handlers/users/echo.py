@@ -76,27 +76,33 @@ async def echo_bot(message: types.Message):
             await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring")
             return
 
-        if data["type"] == "stories":
+        if data["type"] == "image":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_PHOTO)
+            await message.answer_photo(data["medias"][0]["download_url"])
+
+        elif data["type"] == "video":
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
-            
+            await message.answer_video(data["medias"][0]["download_url"])
+
+        elif data["type"]  == "album":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
+
             media_group = []
             for media in data["medias"]:
                 if media["type"] == "video":
-                    media_group.append(InputMediaVideo(media=media["download_url"], caption="Videos"))
+                    media_group.append(InputMediaVideo(media=media["download_url"]))
                 else:
-                    media_group.append(InputMediaPhoto(media=media["download_url"], caption="Photos"))
-                
+                    media_group.append(InputMediaPhoto(media=media["download_url"]))
+
                 if len(media_group) == 10:
                     await message.answer_media_group(media_group)
                     media_group = []
 
             if media_group:
                 await message.answer_media_group(media_group)
-    
+
     except Exception as e:
         print("Error:", e)
-        await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring")
+        await message.answer("Xatolik yuz berdi, qayta urunib ko'ring.")
     finally:
         await info.delete()
-
-
