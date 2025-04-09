@@ -137,7 +137,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
 async def download_file(url: str, filename: str) -> str:
     """URL'dan faylni serverga yuklab olish."""
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.get(url)
             print(f"Response status: {response.status_code}")  # Debugging
             if response.status_code == 200:
