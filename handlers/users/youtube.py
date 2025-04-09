@@ -94,14 +94,13 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 except Exception as e:
                     print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/video_{int(time.time())}.mp4"
-                    download_path = await download_file(video_url, custom_file_name)
-                    print(download_file, "path")
-                    if download_path:
+                    download_path1 = await download_file(video_url, custom_file_name)
+                    if download_path1:
                         await call.message.answer_video(
-                            video=FSInputFile(download_path), 
+                            video=FSInputFile(download_path1), 
                             caption=title
                         )
-                        os.remove(download_path)
+                        os.remove(download_path1)
                     else:
                         print("Error 2")
                         await call.message.answer("❌ Video yuklab olinmadi!")
@@ -113,13 +112,13 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 except Exception as e:
                     print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/audio_{int(time.time())}.mp3"
-                    download_path = await download_file(audio_url, custom_file_name)
-                    if download_path:
+                    download_path1 = await download_file(audio_url, custom_file_name)
+                    if download_path1:
                         await call.message.answer_audio(
-                            audio=FSInputFile(download_path), 
+                            audio=FSInputFile(download_path1), 
                             caption=title
                         )
-                        os.remove(download_path)
+                        os.remove(download_path1)
                     else:
                         print("Error 3")
                         await call.message.answer("❌ Audio yuklab olinmadi!")
