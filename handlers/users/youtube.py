@@ -81,6 +81,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
         first_media = medias[0]
 
         if not isinstance(first_media, dict):
+            print("Error 1")
             await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
             return
 
@@ -91,6 +92,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                     # First try sending directly
                     await call.message.answer_video(video_url, caption=title)
                 except Exception as e:
+                    print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/video_{int(time.time())}.mp4"
                     download_path = await download_file(video_url, custom_file_name)
                     if download_path:
@@ -100,6 +102,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                         )
                         os.remove(download_path)
                     else:
+                        print("Error 2")
                         await call.message.answer("❌ Video yuklab olinmadi!")
                         
             elif res == "audio" and "audio_url" in first_media:
@@ -107,6 +110,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 try:
                     await call.message.answer_audio(audio_url, caption=title)
                 except Exception as e:
+                    print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/audio_{int(time.time())}.mp3"
                     download_path = await download_file(audio_url, custom_file_name)
                     if download_path:
@@ -116,6 +120,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                         )
                         os.remove(download_path)
                     else:
+                        print("Error 3")
                         await call.message.answer("❌ Audio yuklab olinmadi!")
             else:
                 await call.message.answer("❌ Noto'g'ri so'rov turi!")
