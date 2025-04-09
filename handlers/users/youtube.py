@@ -137,13 +137,16 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
 async def download_file(url: str, filename: str) -> str:
     """URL'dan faylni serverga yuklab olish."""
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    with open(filename, 'wb') as f:
-                        f.write(await response.read())
-                    return filename
-                return None
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            print(f"Response status: {response.status_code}")  # Debugging
+            if response.status_code == 200:
+                with open(filename, 'wb') as f:
+                    f.write(response.content)
+                print(f"File saved: {filename}")  # Debugging
+                return filename
+            print("Failed to download file")  # Debugging
+            return None
     except Exception as e:
         print(f"Download error: {e}")
         return None
