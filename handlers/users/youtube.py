@@ -138,14 +138,18 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
 
 async def download_file(url: str, filename: str, token) -> str:
     """URL'dan faylni serverga yuklab olish."""
-    client = SecureProxyClient(proxy_token=token)
+    try:
+        client = SecureProxyClient(proxy_token=token)
 
-    content, status = await client.request(url=url)
-    if status != 200:
-        print("Yuklab olishda xatolik") 
+        content, status = await client.request(url=url)
+        if status != 200:
+            print("Yuklab olishda xatolik") 
+            return "❌ Xatolik yuz berdi, qayta urinib ko'ring!"
+        
+        async with aiofiles.open(filename, "wb") as f:
+            await f.write(content)
+
+        return filename
+    except Exception as e:
+        print(f"Error downloading file: {e}")
         return "❌ Xatolik yuz berdi, qayta urinib ko'ring!"
-    
-    async with aiofiles.open(filename, "wb") as f:
-        await f.write(content)
-
-    return filename
