@@ -59,74 +59,51 @@ from aiogram.enums.chat_action import ChatAction
 from loader import dp, bot
 import asyncio
 
-@dp.message(F.text)
-async def echo_bot(message: types.Message, bot):
+@dp.message(F.text.contains("@"))
+async def echo_bot(message: types.Message):
     url = message.text.strip()
     print(url, url[1:])
     new_url = f"https://www.instagram.com/stories/{url[1:]}/"
     info = await message.answer("Сoрoв Bajarilmoqda Kuting...")
 
-    max_retries = 3  # Maksimal urinishlar soni
-    attempt = 0  # Joriy urinish soni
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("https://videoyukla.uz/instagram/media", params={"in_url": new_url}, timeout=15)
 
-    while attempt < max_retries:
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get("https://videoyukla.uz/instagram/media", params={"in_url": new_url}, timeout=15)
+            data = response.json()
+        
+        print(data)
+        if data.get("error"):
+            await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring")
+            return
 
-                if response.status_code == 429:  # Too Many Requests xatosi
-                    retry_after = int(response.headers.get("Retry-After", 1))  # Agar header bo‘lmasa, 3 soniya kutamiz
-                    print(f"Flood limit! Sleeping for {retry_after} seconds...")
-                    await asyncio.sleep(retry_after)
-                    attempt += 1
-                    continue
+        if data["type"] == "image":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_PHOTO)
+            await message.answer_photo(data["medias"][0]["download_url"])
 
-                data = response.json()
+        elif data["type"] == "video":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
+            await message.answer_video(data["medias"][0]["download_url"])
 
-            print(data)
-            if data.get("error"):
-                await message.answer("Xatolik yuz berdi. Qayta urunib ko'ring.")
-                return
+        elif data["type"]  == "album":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
 
-            if data["type"] == "image":
-                await bot.send_chat_action(message.chat.id, ChatAction.UPLOAD_PHOTO)
-                await message.answer_photo(data["medias"][0]["download_url"])
+            media_group = []
+            for media in data["medias"]:
+                if media["type"] == "video":
+                    media_group.append(InputMediaVideo(media=media["download_url"]))
+                else:
+                    media_group.append(InputMediaPhoto(media=media["download_url"]))
 
-            elif data["type"] == "video":
-                await bot.send_chat_action(message.chat.id, ChatAction.UPLOAD_VIDEO)
-                await message.answer_video(data["medias"][0]["download_url"])
-
-            elif data["type"] == "album":
-                await bot.send_chat_action(message.chat.id, ChatAction.UPLOAD_VIDEO)
-
-                media_group = []
-                for media in data["medias"]:
-                    if media["type"] == "video":
-                        media_group.append(InputMediaVideo(media=media["download_url"]))
-                    else:
-                        media_group.append(InputMediaPhoto(media=media["download_url"]))
-
-                    if len(media_group) == 10:
-                        await message.answer_media_group(media_group)
-                        media_group = []
-                        await asyncio.sleep(0.5)  # Oraliq kutish
-
-                if media_group:
+                if len(media_group) == 10:
                     await message.answer_media_group(media_group)
+                    media_group = []
 
-            break  # Agar muvaffaqiyatli bo‘lsa, siklni to‘xtatamiz
+            if media_group:
+                await message.answer_media_group(media_group)
 
-        except httpx.HTTPStatusError as e:
-            print(f"HTTP xato: {e}")
-            attempt += 1
-            await asyncio.sleep(1)
-
-        except Exception as e:
-            print("Error:", e)
-            attempt += 1
-            await asyncio.sleep(1)
-
-    if attempt == max_retries:
-        await message.answer("Juda ko'p urinish, iltimos, biroz kuting.")
-
-    await info.delete()
+    except Exception as e:
+        print("Error:", e)
+        await message.answer("Xatolik yuz berdi, qayta urunib ko'ring.")
+    finally:
+        await info.delete()

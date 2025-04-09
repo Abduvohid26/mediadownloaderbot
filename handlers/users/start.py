@@ -15,78 +15,123 @@ async def start_bot(message:types.Message):
 from aiogram.types import  InputMediaPhoto, InputMediaVideo
 
 import httpx
-import asyncio
 
 @dp.message(F.text, CheckInstaLink())
 async def get_content(message: types.Message):
     url = message.text.strip()
     info = await message.answer("Sorov Bajarilmoqda Kuting...")
 
-    max_retries = 3  # Maksimal urinishlar soni
-    attempt = 0  # Joriy urinish soni
+    async with httpx.AsyncClient() as client:
+        response = await client.post("http://95.169.205.213:8080/instagram/media", data={"url": url}, timeout=15)
+        data = response.json()
 
-    while attempt < max_retries:
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get("https://videoyukla.uz/instagram/media", params={"in_url": url}, timeout=15)
 
-                if response.status_code == 429:  
-                    retry_after = int(response.headers.get("Retry-After", 1))  
-                    print(f"Flood limit! Sleeping for {retry_after} seconds...")
-                    await asyncio.sleep(retry_after)
-                    attempt += 1
-                    continue
+    try:
+        if data.get("error"):
+            await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring!")
+            return
 
-                data = response.json()
-            print(data, "Data")
+        if data["type"] == "image":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_PHOTO)
+            await message.answer_photo(data["medias"][0]["download_url"])
 
-            if data.get("error"):
-                await message.answer("Xatolik Yuz berdi. Qayta urunib ko'ring!")
-                return
+        elif data["type"] == "video":
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
+            await message.answer_video(data["download_url"])
 
-            if data["type"] == "image":
-                await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_PHOTO)
-                await message.answer_photo(data["medias"][0]["download_url"])
+        elif data["type"] in ["album", "stories"]:
+            await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
 
-            elif data["type"] == "video":
-                await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
-                await message.answer_video(data["medias"][0]["download_url"])
+            media_group = []
+            for media in data["medias"]:
+                if media["type"] == "video":
+                    media_group.append(InputMediaVideo(media=media["download_url"]))
+                else:
+                    media_group.append(InputMediaPhoto(media=media["download_url"]))
 
-            elif data["type"] == "album":
-                await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
-
-                media_group = []
-                for media in data["medias"]:
-                    if media["type"] == "video":
-                        media_group.append(InputMediaVideo(media=media["download_url"]))
-                    else:
-                        media_group.append(InputMediaPhoto(media=media["download_url"]))
-
-                    if len(media_group) == 10:
-                        await message.answer_media_group(media_group)
-                        media_group = []
-                        await asyncio.sleep(0.5) 
-
-                if media_group:
+                if len(media_group) == 10:
                     await message.answer_media_group(media_group)
+                    media_group = []
 
-            break  # Agar muvaffaqiyatli bo‘lsa, siklni to‘xtatamiz
+            if media_group:
+                await message.answer_media_group(media_group)
 
-        except Exception as e:
-            print("Error:", e)
-            attempt += 1
-            await asyncio.sleep(1)  # Har qanday xatodan keyin biroz kutish
+    except Exception as e:
+        print("Error:", e)
+        await message.answer("Xatolik yuz berdi, qayta urunib ko'ring.")
+    finally:
+        await info.delete()
 
-    if attempt == max_retries:
-        await message.answer("Juda ko'p urinish, iltimos, biroz kuting.")
 
-    await info.delete()
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+class YtVideoState(StatesGroup):
+    start = State()
+
+
+@dp.message(F.text, YtCheckLink())
+async def get_content(message: types.Message, state: FSMContext):
+    url = message.text.strip()
+    info = await message.answer("Sorov Bajarilmoqda Kuting...")
+
+    response = requests.post("http://95.169.205.213:8080/yt/media", data={"url": url})
+    data = response.json()
+
+    if not data.get("error"):
+        await info.delete()
+        await state.update_data({"data": data})
+        print(data["thumbnail"], "thub", data)
+        btn = InlineKeyboardBuilder()
+        btn.button(text="Video", callback_data="data_video")
+        btn.button(text="Audio", callback_data="data_audio")
+        btn.adjust(2)
+
+        await message.answer_photo(
+            photo=data["thumbnail"],
+            caption=data["title"],
+            reply_markup=btn.as_markup()
+        )
+        await state.set_state(YtVideoState.start)
+    else:
+        await info.delete()
+        await message.answer("Xatolik yuz berdi, qayta urinib ko'ring.")
+
+
+@dp.callback_query(YtVideoState.start, lambda query: query.data.startswith("data_"))
+async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
+    res = call.data.split("_")[-1]
+    state_data = await state.get_data()
+    print(state_data, "data")
+    medias = state_data.get("data", {}).get("medias", [])
+    title = state_data.get("data", {}).get("title")
+    
+    if not medias:
+        await call.answer("Media topilmadi!")
+        return
+
+    for data in medias:
+        # Video uchun shart
+        if res == "video" and data.get("type") == "video" and not data.get("is_audio") and data.get("ext") == "mp4":
+            await call.message.answer_video(data["url"], caption=title)
+            return
+            
+        # Audio uchun shart
+        if res == "audio" and data.get("type") == "audio" and data.get("is_audio") and data.get("ext") in ["weba", "mp3"]:
+            await call.message.answer_audio(data["url"], caption=title)
+            return
+
+    await call.answer("Mos media topilmadi!")
+    await state.clear()
 
 
 
 from aiogram.filters import Command
 
+import requests
+
 @dp.message(Command("check"))
 async def check(message: types.Message):
-    
+    res = requests.post(url="http://localhost:8080/")
     await message.answer_video(video=f"")

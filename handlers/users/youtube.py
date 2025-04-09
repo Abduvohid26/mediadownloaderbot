@@ -1,97 +1,143 @@
-# from aiogram.fsm.state import State, StatesGroup
-# from aiogram.fsm.context import FSMContext
-# from aiogram.utils.keyboard import InlineKeyboardBuilder
-# from loader import dp, bot
-# from  aiogram import types, F
-# from filters.my_filter import YtCheckLink
-# import requests
-# class YtVideoState(StatesGroup):
-#     start = State()
+from aiogram.filters import Command
+from aiogram.types import FSInputFile
+from loader import bot, dp
+from aiogram import types
+from aiogram.enums.chat_action import ChatAction
+import httpx
+import os
 
 
-# @dp.message(F.text, YtCheckLink())
-# async def get_content(message: types.Message, state: FSMContext):
-#     url = message.text.strip()
-#     info = await message.answer("Sorov Bajarilmoqda Kuting...")
+LARGE_FILE = "alik.mp4"
 
-#     response = requests.post("https://videoyukla.uz/youtube/media/", data={"url": url, "k": "240"})
-#     print(response, 'res')
-#     data = response.json()
-#     await state.update_data({'data': data})
-#     btn = InlineKeyboardBuilder()
-#     btn.button(text="Video", callback_data="data_video")
-#     btn.button(text="Audio", callback_data="data_audio")
-#     btn.adjust(2)
-#     await message.answer_photo(
-#             photo=data["thumb"],
-#             caption=data["title"],
-#             reply_markup=btn.as_markup()
-#         )
-#     await state.set_state(YtVideoState.start)
-#     await info.delete()
+@dp.message(Command("youtube"))
+async def youtube(msg: types.Message):
+    video = FSInputFile(LARGE_FILE)  
+    print(video, "Video")
+    await bot.send_chat_action(chat_id=msg.chat.id, action=ChatAction.UPLOAD_VIDEO)
+    await bot.send_video(chat_id=msg.chat.id, video=video)
 
 
-#     # if not data.get("error"):
-#     #     await info.delete()
-#     #     await state.update_data({"data": data})
-#     #     print(data["thumbnail"], "thub", data)
-#     #     btn = InlineKeyboardBuilder()
-#     #     btn.button(text="Video", callback_data="data_video")
-#     #     btn.button(text="Audio", callback_data="data_audio")
-#     #     btn.adjust(2)
-#     #
-#     #     await message.answer_photo(
-#     #         photo=data["thumbnail"],
-#     #         caption=data["title"],
-#     #         reply_markup=btn.as_markup()
-#     #     )
-#     #     await state.set_state(YtVideoState.start)
-#     # else:
-#     #     await info.delete()
-#     #     await message.answer("Xatolik yuz berdi, qayta urinib ko'ring.")
+
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from loader import dp, bot
+from  aiogram import types, F
+from filters.my_filter import YtCheckLink
+import requests
+import aiohttp
+import time
 
 
-# @dp.callback_query(YtVideoState.start, lambda query: query.data.startswith("data_"))
-# async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
-#     res = call.data.split("_")[-1]
-#     state_data = await state.get_data()
-#     try:
-#         if res == "video":
-#             print(state_data["data"]["video_download_url"])
-#             video = state_data["data"]["video_download_url"]
-#             title = state_data["data"]["title"]
-#             await call.message.answer_video(video=video, caption=title)
-#             return
-#         else:
-#             print(state_data["data"]["audio_download_url"])
-#             audio = state_data["data"]["audio_download_url"]
-#             title = state_data["data"]["title"]
-#             await call.message.answer_audio(audio=audio, caption=title)
-#             return
-#     except Exception as e:
-#         print("Error:", e)
-#         await call.message.answer(text="Xatolik yuz berdi qayta urinib ko'ring")
-#     # @dp.callback_query(YtVideoState.start, lambda query: query.data.startswith("data_"))
-# # async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
-# #     res = call.data.split("_")[-1]
-# #     state_data = await state.get_data()
-# #     print(state_data, "data")
-# #     medias = state_data.get("data", {}).get("medias", [])
-# #     title = state_data.get("data", {}).get("title")
-# #
-# #     if not medias:
-# #         await call.answer("Media topilmadi!")
-# #         return
-# #
-# #     for data in medias:
-# #         if res == "video" and data.get("type") == "video" and not data.get("is_audio") and data.get("ext") == "mp4":
-# #             await call.message.answer_video(data["url"], caption=title)
-# #             return
-# #
-# #         if res == "audio" and data.get("type") == "audio" and data.get("is_audio") and data.get("ext") in ["weba", "mp3"]:
-# #             await call.message.answer_audio(data["url"], caption=title)
-# #             return
-# #
-# #     await call.answer("Mos media topilmadi!")
-# #     await state.clear()
+class YtVideoState(StatesGroup):
+    start = State()
 
+
+
+@dp.message(F.text, YtCheckLink())
+async def get_content(message: types.Message, state: FSMContext):
+    url = message.text.strip()
+    info = await message.answer("📡 So‘rov bajarilmoqda, kuting...")
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.get("https://videoyukla.uz/youtube/media/", params={"yt_url": url})
+        data = response.json()
+    if data["error"] == True:
+        await info.delete()
+        await message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+        return
+    await state.update_data({'data': data})
+
+    btn = InlineKeyboardBuilder()
+    btn.button(text="🎥 Video", callback_data="data_video")
+    btn.button(text="🎵 Audio", callback_data="data_audio")
+    btn.adjust(2)
+
+    # Rasm yuborish
+    await message.answer_photo(
+        photo=data["thumbnail"],
+        caption=data["title"],
+        reply_markup=btn.as_markup()
+    )
+
+    await state.set_state(YtVideoState.start)
+    await info.delete()
+
+os.makedirs("media", exist_ok=True)
+
+@dp.callback_query(YtVideoState.start, lambda query: query.data.startswith("data_"))
+async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer("Sorov bajarilmoqda kuting...")
+    try:
+        res = call.data.split("_")[-1]  # "video" yoki "audio"
+        state_data = await state.get_data()
+        medias = state_data.get("data", {}).get("medias", [])
+        title = state_data.get("data", {}).get("title")
+
+        if not medias:
+            await call.answer("❌ Media topilmadi!")
+            return
+
+        first_media = medias[0]
+
+        if not isinstance(first_media, dict):
+            await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+            return
+
+        try:
+            if res == "video" and "video_url" in first_media:
+                video_url = first_media["video_url"]
+                try:
+                    # First try sending directly
+                    await call.message.answer_video(video_url, caption=title)
+                except Exception as e:
+                    custom_file_name = f"media/video_{int(time.time())}.mp4"
+                    download_path = await download_file(video_url, custom_file_name)
+                    if download_path:
+                        await call.message.answer_video(
+                            video=FSInputFile(download_path), 
+                            caption=title
+                        )
+                        os.remove(download_path)
+                    else:
+                        await call.message.answer("❌ Video yuklab olinmadi!")
+                        
+            elif res == "audio" and "audio_url" in first_media:
+                audio_url = first_media["audio_url"]
+                try:
+                    await call.message.answer_audio(audio_url, caption=title)
+                except Exception as e:
+                    custom_file_name = f"media/audio_{int(time.time())}.mp3"
+                    download_path = await download_file(audio_url, custom_file_name)
+                    if download_path:
+                        await call.message.answer_audio(
+                            audio=FSInputFile(download_path), 
+                            caption=title
+                        )
+                        os.remove(download_path)
+                    else:
+                        await call.message.answer("❌ Audio yuklab olinmadi!")
+            else:
+                await call.message.answer("❌ Noto'g'ri so'rov turi!")
+                
+        except Exception as e:
+            print(f"Error in media sending: {e}")
+            await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+
+    except Exception as e:
+        print(f"General error: {e}")
+        await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+
+async def download_file(url: str, filename: str) -> str:
+    """URL'dan faylni serverga yuklab olish."""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    with open(filename, 'wb') as f:
+                        f.write(await response.read())
+                    return filename
+                return None
+    except Exception as e:
+        print(f"Download error: {e}")
+        return None
