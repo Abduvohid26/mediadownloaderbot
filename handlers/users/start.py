@@ -25,7 +25,7 @@ async def get_content(message: types.Message):
         response = await client.get("https://videoyukla.uz/instagram/media", params={"in_url": url}, timeout=15)
         data = response.json()
 
-
+    print(data)
     try:
         if data.get("error"):
             await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring!")
@@ -37,13 +37,14 @@ async def get_content(message: types.Message):
 
         elif data["type"] == "video":
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
-            await message.answer_video(data["download_url"])
+            await message.answer_video(data["medias"][0]["download_url"])
 
         elif data["type"] in ["album", "stories"]:
             await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
 
             media_group = []
             for media in data["medias"]:
+                print(media, "MEDIA")
                 if media["type"] == "video":
                     media_group.append(InputMediaVideo(media=media["download_url"]))
                 else:
