@@ -84,7 +84,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
 
         if not isinstance(first_media, dict):
             print("Error 1")
-            await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+            await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!1")
             return
 
         try:
@@ -130,11 +130,11 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 
         except Exception as e:
             print(f"Error in media sending: {e}")
-            await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+            await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!error send")
 
     except Exception as e:
         print(f"General error: {e}")
-        await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+        await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!general")
 
 async def download_file(url: str, filename: str, token) -> str:
     """URL'dan faylni serverga yuklab olish."""
@@ -144,7 +144,7 @@ async def download_file(url: str, filename: str, token) -> str:
         content, status = await client.request(url=url)
         if status != 200:
             print("Yuklab olishda xatolik") 
-            return "❌ Xatolik yuz berdi, qayta urinib ko'ring!"
+            return "❌ Xatolik yuz berdi, qayta urinib ko'ring!dowload1"
         
         async with aiofiles.open(filename, "wb") as f:
             await f.write(content)
@@ -152,4 +152,4 @@ async def download_file(url: str, filename: str, token) -> str:
         return filename
     except Exception as e:
         print(f"Error downloading file: {e}")
-        return "❌ Xatolik yuz berdi, qayta urinib ko'ring!"
+        return "❌ Xatolik yuz berdi, qayta urinib ko'ring!download"
