@@ -5,7 +5,8 @@ from aiogram import types
 from aiogram.enums.chat_action import ChatAction
 import httpx
 import os
-
+from secure_proxy import SecureProxyClient
+import aiofiles
 
 LARGE_FILE = "alik.mp4"
 
@@ -73,6 +74,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
         state_data = await state.get_data()
         medias = state_data.get("data", {}).get("medias", [])
         title = state_data.get("data", {}).get("title")
+        token = state_data.get("data", {}).get("token")
 
         if not medias:
             await call.answer("❌ Media topilmadi!")
@@ -94,7 +96,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 except Exception as e:
                     print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/video_{int(time.time())}.mp4"
-                    download_path1 = await download_file(video_url, custom_file_name)
+                    download_path1 = await download_file(video_url, custom_file_name, token)
                     print(download_path1, "download_path1")
                     if download_path1:
                         await call.message.answer_video(
@@ -113,7 +115,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 except Exception as e:
                     print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/audio_{int(time.time())}.mp3"
-                    download_path1 = await download_file(audio_url, custom_file_name)
+                    download_path1 = await download_file(audio_url, custom_file_name, token)
                     if download_path1:
                         await call.message.answer_audio(
                             audio=FSInputFile(download_path1), 
@@ -134,19 +136,16 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
         print(f"General error: {e}")
         await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
 
-async def download_file(url: str, filename: str) -> str:
+async def download_file(url: str, filename: str, token) -> str:
     """URL'dan faylni serverga yuklab olish."""
-    try:
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-            response = await client.get(url)
-            print(f"Response status: {response.status_code}")  # Debugging
-            if response.status_code == 200:
-                with open(filename, 'wb') as f:
-                    f.write(response.content)
-                print(f"File saved: {filename}")  # Debugging
-                return filename
-            print("Failed to download file")  # Debugging
-            return None
-    except Exception as e:
-        print(f"Download error: {e}")
-        return None
+    client = SecureProxyClient(proxy_token=token)
+
+    content, status = await client.request(url=url)
+    if status != 200:
+        print("Yuklab olishda xatolik") 
+        return "❌ Xatolik yuz berdi, qayta urinib ko'ring!"
+    
+    async with aiofiles.open(filename, "wb") as f:
+        await f.write(content)
+
+    return filename
