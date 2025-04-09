@@ -95,6 +95,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                     print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/video_{int(time.time())}.mp4"
                     download_path1 = await download_file(video_url, custom_file_name)
+                    print(download_path1, "download_path1")
                     if download_path1:
                         await call.message.answer_video(
                             video=FSInputFile(download_path1), 
