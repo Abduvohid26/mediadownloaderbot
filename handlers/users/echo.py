@@ -59,7 +59,7 @@ from aiogram.enums.chat_action import ChatAction
 from loader import dp, bot
 import asyncio
 
-@dp.message(F.text.contains("@"))
+# @dp.message(F.text.contains("@"))
 async def echo_bot(message: types.Message):
     url = message.text.strip()
     print(url, url[1:])
