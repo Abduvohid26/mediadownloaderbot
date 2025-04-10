@@ -75,6 +75,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
         medias = state_data.get("data", {}).get("medias", [])
         title = state_data.get("data", {}).get("title")
         token = state_data.get("data", {}).get("token")
+        thumb = state_data.get("data", {}).get("thumbnail")
 
         if not medias:
             await call.answer("❌ Media topilmadi!")
@@ -92,17 +93,19 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 video_url = first_media["video_url"]
                 try:
                     # First try sending directly
-                    await call.message.answer_video(video_url, caption=title)
+                    await bot.send_video(chat_id=call.message.chat.id, video=video_url, caption=title, supports_streaming=True, thumbnail=thumb)
+
                 except Exception as e:
                     print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/video_{int(time.time())}.mp4"
                     download_path1 = await download_file(video_url, custom_file_name, token)
                     print(download_path1, "download_path1")
                     if download_path1:
-                        await call.message.answer_video(
-                            video=FSInputFile(download_path1), 
-                            caption=title
-                        )
+                        await bot.send_video(chat_id=call.message.chat.id, video=FSInputFile(download_path1), caption=title, supports_streaming=True, thumbnail=thumb)
+                        # await call.message.answer_video(
+                        #     video=FSInputFile(download_path1), 
+                        #     caption=title
+                        # )
                         os.remove(download_path1)
                     else:
                         print("Error 2")
@@ -119,7 +122,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                     if download_path1:
                         await call.message.answer_audio(
                             audio=FSInputFile(download_path1), 
-                            caption=title
+                            caption=title,
                         )
                         os.remove(download_path1)
                     else:
@@ -148,7 +151,7 @@ async def download_file(url: str, filename: str, token) -> str:
         
         async with aiofiles.open(filename, "wb") as f:
             await f.write(content)
-
+        print("Yuklandi")
         return filename
     except Exception as e:
         print(f"Error downloading file: {e}")
