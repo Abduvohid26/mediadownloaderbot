@@ -37,7 +37,7 @@ async def get_content(message: types.Message, state: FSMContext):
         await info.delete()
         return await message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
 
-    await state.update_data(data=data)
+    await state.update_data({"data": data})
 
     btn = InlineKeyboardBuilder()
     btn.button(text="🎥 Video", callback_data="data_video")
