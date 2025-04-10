@@ -85,10 +85,25 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 await send_downloaded_video(call, media_url, title, thumb, token)
 
         elif res == "audio":
+            audio_media = next((m for m in medias if m["type"] == "audio"), None)
+            if not audio_media:
+                await call.message.answer("❌ Audio topilmadi!")
+                return
+
+            audio_url = audio_media["url"]
+
             try:
-                await call.message.answer_audio(media_url, caption=title)
-            except Exception:
-                await send_downloaded_audio(call, media_url, title, token)
+                await call.message.answer_audio(audio_url, caption=title)
+            except Exception as e:
+                print(e, "audio error")
+                audio_path = f"media/audio_{int(time.time())}.mp3"
+                audio_downloaded = await download_file(audio_url, audio_path, token)
+
+                if audio_downloaded:
+                    await call.message.answer_audio(audio=FSInputFile(audio_path), caption=title)
+                    os.remove(audio_path)
+                else:
+                    await call.message.answer("❌ Audio yuklab olinmadi!")
 
     except Exception as e:
         print(f"Xatolik: {e}")
@@ -97,7 +112,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
 
 async def send_downloaded_video(call, url, title, thumb, token):
     """Videoni yuklab olib jo‘natish."""
-    video_file = f"media/video_{int(time.time())}.mp4"
+    video_file = f"media/video_{int(time.time())}.mp4"  
     thumb_file = f"media/thumb_{int(time.time())}.jpg"
 
     thumb_path, video_path = await asyncio.gather(
