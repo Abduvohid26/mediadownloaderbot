@@ -101,17 +101,16 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                     custom_file_name_thumb = f"media/thumb_{int(time.time())}.jpg"
 
                     thumb = await download_thumb(custom_file_name_thumb, thumb)
+                    print(thumb, "thun")
 
                     download_path1 = await download_file(video_url, custom_file_name, token)
                     print(download_path1, "download_path1")
                     if download_path1:
                         await bot.send_video(chat_id=call.message.chat.id, video=FSInputFile(download_path1), caption=title, supports_streaming=True, thumbnail=FSInputFile(thumb))
-                        # await call.message.answer_video(
-                        #     video=FSInputFile(download_path1), 
-                        #     caption=title
-                        # )
                         os.remove(download_path1)
+                        os.remove(thumb)
                     else:
+
                         print("Error 2")
                         await call.message.answer("❌ Video yuklab olinmadi!")
                         
@@ -165,11 +164,19 @@ async def download_file(url: str, filename: str, token) -> str:
 
 async def download_thumb(file_path, url):
     try:
-        async with aiofiles.open(file_path, "wb") as f:
-            response = await httpx.get(url)
-            await f.write(response.content)
-        print("Thumbnail yuklandi")
-        return file_path
+        # Make the HTTP request to fetch the thumbnail
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            # Check if the request was successful
+            if response.status_code == 200:
+                async with aiofiles.open(file_path, "wb") as f:
+                    # Write the response content (image) to the file
+                    await f.write(await response.aread())
+                print("Thumbnail yuklandi")
+                return file_path
+            else:
+                print(f"Failed to download thumbnail: {response.status_code}")
+                return "❌ Xatolik yuz berdi, qayta urinib ko'ring!thumbnail"
     except Exception as e:
         print(f"Error downloading thumbnail: {e}")
         return "❌ Xatolik yuz berdi, qayta urinib ko'ring!thumbnail"
