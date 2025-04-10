@@ -93,15 +93,19 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
                 video_url = first_media["video_url"]
                 try:
                     # First try sending directly
-                    await bot.send_video(chat_id=call.message.chat.id, video=video_url, caption=title, supports_streaming=True, thumbnail=thumb)
+                    await bot.send_video(chat_id=call.message.chat.id, video=video_url, caption=title, supports_streaming=True)
 
                 except Exception as e:
                     print(e, "eeeeeeeeeeeeeee")
                     custom_file_name = f"media/video_{int(time.time())}.mp4"
+                    custom_file_name_thumb = f"media/thumb_{int(time.time())}.jpg"
+
+                    thumb = await download_thumb(custom_file_name_thumb, thumb)
+
                     download_path1 = await download_file(video_url, custom_file_name, token)
                     print(download_path1, "download_path1")
                     if download_path1:
-                        await bot.send_video(chat_id=call.message.chat.id, video=FSInputFile(download_path1), caption=title, supports_streaming=True, thumbnail=thumb)
+                        await bot.send_video(chat_id=call.message.chat.id, video=FSInputFile(download_path1), caption=title, supports_streaming=True, thumbnail=FSInputFile(thumb))
                         # await call.message.answer_video(
                         #     video=FSInputFile(download_path1), 
                         #     caption=title
@@ -156,3 +160,16 @@ async def download_file(url: str, filename: str, token) -> str:
     except Exception as e:
         print(f"Error downloading file: {e}")
         return "❌ Xatolik yuz berdi, qayta urinib ko'ring!download"
+    
+
+
+async def download_thumb(file_path, url):
+    try:
+        async with aiofiles.open(file_path, "wb") as f:
+            response = await httpx.get(url)
+            await f.write(response.content)
+        print("Thumbnail yuklandi")
+        return file_path
+    except Exception as e:
+        print(f"Error downloading thumbnail: {e}")
+        return "❌ Xatolik yuz berdi, qayta urinib ko'ring!thumbnail"
