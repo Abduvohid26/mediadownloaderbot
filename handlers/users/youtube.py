@@ -107,7 +107,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
 
     except Exception as e:
         print(f"Xatolik: {e}")
-        await call.message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+        await call.message.answer(f"❌ Xatolik yuz berdi, qayta urinib ko'ring!\n{e}")
 
 
 async def send_downloaded_video(call, url, title, thumb, token):

@@ -21,7 +21,7 @@ async def get_content(message: types.Message):
     url = message.text.strip()
     info = await message.answer("Sorov Bajarilmoqda Kuting...")
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30) as client:
         response = await client.get("https://videoyukla.uz/instagram/media", params={"in_url": url}, timeout=15)
         data = response.json()
 
