@@ -135,21 +135,38 @@ async def send_downloaded_video(call, url, title, thumb, token):
         await call.message.answer("❌ Video yuklab olinmadi!")
 
 
-async def send_downloaded_audio(call, url, title, token):
-    """Audiolarni yuklab olib jo‘natish."""
-    audio_file = f"media/audio_{int(time.time())}.mp3"
+async def send_downloaded_video(call, url, title, thumb, token):
+    """Videoni yuklab olib jo‘natish."""
+    os.makedirs("media", exist_ok=True)  # Papkani tekshir va yarat
 
-    audio_path = await download_file(url, audio_file, token)
-    if audio_path:
-        await call.message.answer_audio(audio=FSInputFile(audio_path), caption=title)
-        os.remove(audio_path)
+    video_file = f"media/video_{int(time.time())}.mp4"  
+    thumb_file = f"media/thumb_{int(time.time())}.jpg"
+
+    thumb_path, video_path = await asyncio.gather(
+        download_thumb(thumb_file, thumb),
+        download_file(url, video_file, token),
+    )
+
+    if video_path and os.path.exists(video_path):
+        await bot.send_video(
+            call.message.chat.id,
+            video=FSInputFile(video_path),
+            caption=title,
+            supports_streaming=True,
+            thumbnail=FSInputFile(thumb_path) if thumb_path and os.path.exists(thumb_path) else None,
+        )
+        os.remove(video_path)
+        if thumb_path and os.path.exists(thumb_path):
+            os.remove(thumb_path)
     else:
-        await call.message.answer("❌ Audio yuklab olinmadi!")
+        await call.message.answer("❌ Video yuklab olinmadi!")
+
 
 
 async def download_file(url: str, filename: str, token) -> str:
     """URL'dan faylni serverga yuklab olish."""
     try:
+        os.makedirs("media", exist_ok=True)  # Papkani tekshir va yarat
         client = SecureProxyClient(proxy_token=token)
         content, status = await client.request(url=url)
 
