@@ -35,7 +35,8 @@ async def get_content(message: types.Message, state: FSMContext):
 
     if data.get("error"):
         await info.delete()
-        return await message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!")
+        return await message.answer("❌ Xatolik yuz berdi, qayta urinib ko'ring!\n" \
+        f"{data}")
 
     await state.update_data({"data": data})
 
