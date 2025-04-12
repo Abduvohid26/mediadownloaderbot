@@ -52,3 +52,112 @@
 #     await check(token, file_path, url)
 # import asyncio
 # asyncio.run(main())
+
+
+
+
+
+
+import asyncio
+import httpx
+
+async def check(url: str, idx: int):
+    print(f"📌 {idx + 1}-so‘rov yuborildi")
+    try:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            response = await client.get(
+                "http://localhost:8000/youtube/media/",
+                params={"yt_url": url},
+                timeout=100
+            )
+            if response.status_code != 200:
+                raise ValueError(f"Serverdan yomon javob: {response.status_code}")
+
+            try:
+                result = response.json()
+            except ValueError as e:
+                raise ValueError(f"Javob JSON formatida emas: {e}. Javob: {response.text}")
+
+    except Exception as e:
+        # Agar error details bo'sh bo'lsa fallback xabar qo'yamiz
+        error_details = str(e) or "No error details provided"
+        result = {"error": True, "details": error_details}
+
+    print(f"✅ {idx + 1}-javob tayyor")
+    return idx, result
+
+async def main():
+    url = "https://youtu.be/YsdZcpCFAPY?si=_OjHXX_iAY739Bls"
+    urls = [url] * 50  # 50 ta URL uchun so'rov
+
+    tasks = [asyncio.create_task(check(url, idx)) for idx, url in enumerate(urls)]
+    results = await asyncio.gather(*tasks)
+
+    correct_responses = 0
+    error_responses = 0
+
+    for idx, result in sorted(results, key=lambda x: x[0]):
+        if result.get("error"):
+            error_responses += 1
+            print(f"❌ Response {idx + 1}: Xato - {result}")
+        else:
+            correct_responses += 1
+            print(f"✅ Response {idx + 1}: To'g'ri")
+
+    print(f"\n📊 Xulosa:")
+    print(f"✅ To'g'ri javoblar: {correct_responses}")
+    print(f"❌ Xato javoblar: {error_responses}")
+
+asyncio.run(main())
+
+
+# import asyncio
+# import httpx
+# async def check(url: str, idx: int):
+#     print(f"📌 {idx + 1}-so‘rov yuborildi")
+#     try:
+#         async with httpx.AsyncClient(follow_redirects=True) as client:
+#             response = await client.get(
+#                 "http://localhost:8000/youtube/test/",
+#                 params={"url": url},
+#                 timeout=360
+#             )
+#             if response.status_code != 200:
+#                 raise ValueError(f"Serverdan yomon javob: {response.status_code}")
+
+#             try:
+#                 result = response.json()
+#             except ValueError as e:
+#                 raise ValueError(f"Javob JSON formatida emas: {e}. Javob: {response.text}")
+
+#     except Exception as e:
+#         # Errorni yaxshiroq tekshirish va batafsil ma'lumot olish
+#         error_details = repr(e) if hasattr(e, '__repr__') else str(e) or "No error details provided"
+#         result = {"error": True, "details": error_details}
+
+#     print(f"✅ {idx + 1}-javob tayyor")
+#     return idx, result
+
+
+# async def main():
+#     url = "https://youtu.be/YsdZcpCFAPY?si=_OjHXX_iAY739Bls"
+#     urls = [url] * 50  # 50 ta URL uchun so'rov
+
+#     tasks = [asyncio.create_task(check(url, idx)) for idx, url in enumerate(urls)]
+#     results = await asyncio.gather(*tasks)
+
+#     correct_responses = 0
+#     error_responses = 0
+
+#     # Process the results
+#     for idx, result in sorted(results, key=lambda x: x[0]):
+#         if "error" in result and result["error"]:
+#             error_responses += 1
+#             print(f"❌ Response {idx + 1}: Xato - {result['details']}")
+#         else:
+#             correct_responses += 1
+#             print(f"✅ Response {idx + 1}: Success - {result}")
+
+#     print(f"\nTotal Correct Responses: {correct_responses}")
+#     print(f"Total Error Responses: {error_responses}")
+# asyncio.run(main())

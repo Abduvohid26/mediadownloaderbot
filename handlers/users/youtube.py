@@ -16,6 +16,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from loader import dp, bot
 from  aiogram import types, F
 from filters.my_filter import YtCheckLink
+from aiogram.utils.keyboard import InlineKeyboardButton, InlineKeyboardMarkup
 import time
 
 
@@ -28,7 +29,7 @@ async def get_content(message: types.Message, state: FSMContext):
     url = message.text.strip()
     info = await message.answer("📡 So‘rov bajarilmoqda, kuting...")
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=100) as client:
         try:
             response = await client.get("https://videoyukla.uz/youtube/media/", params={"yt_url": url})
             data = response.json()
