@@ -58,57 +58,57 @@
 
 
 
-import asyncio
-import httpx
+# import asyncio
+# import httpx
 
-async def check(url: str, idx: int):
-    print(f"📌 {idx + 1}-so‘rov yuborildi")
-    try:
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-            response = await client.get(
-                "http://localhost:8000/youtube/media/",
-                params={"yt_url": url},
-                timeout=100
-            )
-            if response.status_code != 200:
-                raise ValueError(f"Serverdan yomon javob: {response.status_code}")
+# async def check(url: str, idx: int):
+#     print(f"📌 {idx + 1}-so‘rov yuborildi")
+#     try:
+#         async with httpx.AsyncClient(follow_redirects=True) as client:
+#             response = await client.get(
+#                 "http://localhost:8000/youtube/media/",
+#                 params={"yt_url": url},
+#                 timeout=100
+#             )
+#             if response.status_code != 200:
+#                 raise ValueError(f"Serverdan yomon javob: {response.status_code}")
 
-            try:
-                result = response.json()
-            except ValueError as e:
-                raise ValueError(f"Javob JSON formatida emas: {e}. Javob: {response.text}")
+#             try:
+#                 result = response.json()
+#             except ValueError as e:
+#                 raise ValueError(f"Javob JSON formatida emas: {e}. Javob: {response.text}")
 
-    except Exception as e:
-        # Agar error details bo'sh bo'lsa fallback xabar qo'yamiz
-        error_details = str(e) or "No error details provided"
-        result = {"error": True, "details": error_details}
+#     except Exception as e:
+#         # Agar error details bo'sh bo'lsa fallback xabar qo'yamiz
+#         error_details = str(e) or "No error details provided"
+#         result = {"error": True, "details": error_details}
 
-    print(f"✅ {idx + 1}-javob tayyor")
-    return idx, result
+#     print(f"✅ {idx + 1}-javob tayyor")
+#     return idx, result
 
-async def main():
-    url = "https://youtu.be/YsdZcpCFAPY?si=_OjHXX_iAY739Bls"
-    urls = [url] * 50  # 50 ta URL uchun so'rov
+# async def main():
+#     url = "https://youtu.be/YsdZcpCFAPY?si=_OjHXX_iAY739Bls"
+#     urls = [url] * 50  # 50 ta URL uchun so'rov
 
-    tasks = [asyncio.create_task(check(url, idx)) for idx, url in enumerate(urls)]
-    results = await asyncio.gather(*tasks)
+#     tasks = [asyncio.create_task(check(url, idx)) for idx, url in enumerate(urls)]
+#     results = await asyncio.gather(*tasks)
 
-    correct_responses = 0
-    error_responses = 0
+#     correct_responses = 0
+#     error_responses = 0
 
-    for idx, result in sorted(results, key=lambda x: x[0]):
-        if result.get("error"):
-            error_responses += 1
-            print(f"❌ Response {idx + 1}: Xato - {result}")
-        else:
-            correct_responses += 1
-            print(f"✅ Response {idx + 1}: To'g'ri")
+#     for idx, result in sorted(results, key=lambda x: x[0]):
+#         if result.get("error"):
+#             error_responses += 1
+#             print(f"❌ Response {idx + 1}: Xato - {result}")
+#         else:
+#             correct_responses += 1
+#             print(f"✅ Response {idx + 1}: To'g'ri")
 
-    print(f"\n📊 Xulosa:")
-    print(f"✅ To'g'ri javoblar: {correct_responses}")
-    print(f"❌ Xato javoblar: {error_responses}")
+#     print(f"\n📊 Xulosa:")
+#     print(f"✅ To'g'ri javoblar: {correct_responses}")
+#     print(f"❌ Xato javoblar: {error_responses}")
 
-asyncio.run(main())
+# asyncio.run(main())
 
 
 # import asyncio
@@ -161,3 +161,47 @@ asyncio.run(main())
 #     print(f"\nTotal Correct Responses: {correct_responses}")
 #     print(f"Total Error Responses: {error_responses}")
 # asyncio.run(main())
+
+
+
+
+
+# from secure_proxy import SecureProxyClient
+
+
+# async def main():
+#     client = SecureProxyClient(proxy_token="proxy_token")
+#     response = await client.request(url="https://example.com")
+#     print(response)
+
+import asyncio
+import aiofiles
+from secure_proxy import SecureProxyClient
+
+PROXY_TOKEN = "59d9a6ba500b23deb274a0cb76d9e7f7"
+
+VIDEO_URL = "https://rr4---sn-q4flrnek.googlevideo.com/videoplayback?expire=1744511150&ei=Tsz6Z8G2Bay-kucPwdbGuQc&ip=2605%3A5fc2%3A200c%3Abc77%3A80ab%3Ae38b%3Ad3a7%3A87ea&id=o-AK7j8pznk6gPT5HusaEezYPnS6wvqL14CdzrMdkMdBSL&itag=140&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1744489550%2C&mh=Kw&mm=31%2C26&mn=sn-q4flrnek%2Csn-a5mekn6d&ms=au%2Conr&mv=m&mvi=4&pl=32&rms=au%2Cau&initcwndbps=2388750&bui=AccgBcPomrw2C6oi3VTIawaVEsWzGkipSYawyeZZ7mG6ZF4EX5rEu-H4Mf-WgNiq-7yZsw50CXaaaiOq&vprv=1&svpuc=1&mime=audio%2Fmp4&ns=5ro9ThZD4eZaDih2afWwoBgQ&rqh=1&gir=yes&clen=7165249&dur=442.688&lmt=1718065243287985&mt=1744489021&fvip=3&keepalive=yes&lmw=1&c=TVHTML5&sefc=1&txp=5318224&n=5J8wJnp0Ogxekg&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AJfQdSswRAIgN8k0XACgNlo8BkhR5rfFyXc2eYP3910_smJ5xAwSlosCIESb1zjGRp2SIMEs8_C7vaXFRbn8Kn3ow34t46WCpcqx&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=ACuhMU0wRQIgXC2gXI-lJEfMYskrBvWernE607UWQFWq5f-1ftJlDiYCIQDgC674ZJhl5alFvzOTjlzsVd34nd-yuHtkNpO5kBXaCw%3D%3D"
+
+OUTPUT_FILE = "video.m4a"
+
+async def download_video():
+    """ Video yuklab olish va saqlash """
+    client = SecureProxyClient(proxy_token=PROXY_TOKEN)
+    
+    print("📥 Yuklab olinmoqda...")
+
+    # 🔗 Proxy orqali video faylni yuklab olish
+    content, status = await client.request(url=VIDEO_URL)
+    print(content, status)
+    if status != 200:
+        print(f"❌ Xatolik: HTTP {status}")
+        return
+
+    # 💾 Faylni saqlash
+    async with aiofiles.open(OUTPUT_FILE, "wb") as f:
+        await f.write(content)
+
+    print(f"✅ Video muvaffaqiyatli yuklandi! ({OUTPUT_FILE})")
+
+if __name__ == "__main__":
+    asyncio.run(download_video())

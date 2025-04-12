@@ -8,8 +8,9 @@ import os
 from secure_proxy import SecureProxyClient
 import aiofiles
 import asyncio
+import yt_dlp
 
-
+from concurrent.futures import ThreadPoolExecutor
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -36,7 +37,7 @@ async def get_content(message: types.Message, state: FSMContext):
         except httpx.RequestError as e:
             await info.delete()
             return await message.answer(f"❌ So'rov xatolik: {e}")
-    print(data, "DATA")
+    # print(data, "DATA")
     if data.get("error"):
         await info.delete()
         return await message.answer(f"❌ Xatolik yuz berdi, qayta urinib ko'ring")
@@ -83,6 +84,7 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
         if res == "video":
             await send_media(call, media_url, title, thumb, token, media_type)
         elif res == "audio":
+            print("audio1")
             await send_audio(call, media_url, title, token)
     except Exception as e:
         error = str(e)
@@ -98,15 +100,33 @@ async def send_media(call, url, title, thumb, token, media_type):
     except Exception:
         await send_downloaded_media(call, url, title, thumb, token, media_type)
 
+from .get_proxy import _get_proxy_url
+
 
 async def send_audio(call, url, title, token):
-    audio_path = f"media/audio_{int(time.time())}.mp3"
-    if await download_file(url, audio_path, token):
-        await call.message.answer_audio(audio=FSInputFile(audio_path), caption=title)
-        os.remove(audio_path)
-    else:
-        await call.message.answer("❌ Audio yuklab olinmadi!")
+    """Audio faylni yuborish va xatoliklarni ushlash"""
 
+    try:
+        proxy_data = await _get_proxy_url(proxy_token=token)
+
+        audio_path = f"media/audio_{int(time.time())}.mp3"
+
+        res_path = await download_audio(url, audio_path, proxy_data)
+
+        try:
+            await call.message.answer_audio(audio=FSInputFile(res_path), caption=title)
+        except Exception as e:
+            print(f"Audio yuborishda xato: {e}")
+            return {"success": False, "error": f"Audio yuborishda xato: {e}"}
+
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+
+        return {"success": True, "message": "Audio muvaffaqiyatli yuborildi"}
+
+    except Exception as e:
+        print(f"Xatolik yuz berdi: {e}")
+        return {"success": False, "error": f"Xatolik yuz berdi: {e}"}
 
 async def send_downloaded_media(call, url, title, thumb, token, media_type):
     file_path = f"media/{media_type['type']}_{int(time.time())}.mp4"
@@ -118,14 +138,15 @@ async def send_downloaded_media(call, url, title, thumb, token, media_type):
         download_thumb(thumb_path, thumb),
         download_file(url, file_path, token),
     )
+    print(thumb_path, "thumb")
 
     if video_path and os.path.exists(video_path):
         await bot.send_video(
             call.message.chat.id,
+            thumbnail=FSInputFile(thumb_path),
             video=FSInputFile(video_path),
             caption=title,
             supports_streaming=True,
-            thumbnail=FSInputFile(thumb_path) if thumb_path else None,
         )
         os.remove(video_path)
         if thumb_path:
@@ -167,8 +188,27 @@ async def download_thumb(file_path, url):
 
     return None
 
+def sync_download_audio(url: str, output_path: str, proxy_config=None):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'extractaudio': True,
+        'audioformat': 'mp3',
+        'outtmpl': output_path,
+    }
 
+    if proxy_config:
+        proxy_url = f"http://{proxy_config['username']}:{proxy_config['password']}@{proxy_config['server'].replace('http://', '')}"
+        ydl_opts['proxy'] = proxy_url
+    # yt-dlp yordamida yuklash
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
 
+async def download_audio(url: str, output_path: str, proxy_config: str, ):
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as executor:
+        await loop.run_in_executor(executor, sync_download_audio, url, output_path, proxy_config)
+
+    return output_path
 # class YtVideoState(StatesGroup):
 #     start = State()
 
