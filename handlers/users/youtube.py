@@ -18,14 +18,6 @@ from  aiogram import types, F
 from filters.my_filter import YtCheckLink
 import time
 
-import os
-import time
-import asyncio
-import httpx
-from aiogram import types
-from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
-
 
 class YtVideoState(StatesGroup):
     start = State()
