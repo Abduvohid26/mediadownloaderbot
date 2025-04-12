@@ -83,6 +83,10 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
         elif res == "audio":
             await send_audio(call, media_url, title, token)
     except Exception as e:
+        error = str(e)
+        if "[Errno 2] No such file or directory:" in error:
+            print(e, "E")
+            return
         await call.message.answer(f"❌ Xatolik yuz berdi, qayta urinib ko'ring!\n{e}")
 
 
