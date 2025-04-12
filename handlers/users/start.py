@@ -29,6 +29,7 @@ async def get_content(message: types.Message):
     try:
         if data.get("error"):
             await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring!")
+            print("Error server")
             return
 
         if data["type"] == "image":
