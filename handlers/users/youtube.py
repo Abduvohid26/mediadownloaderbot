@@ -36,7 +36,7 @@ async def get_content(message: types.Message, state: FSMContext):
         except httpx.RequestError as e:
             await info.delete()
             return await message.answer(f"❌ So'rov xatolik: {e}")
-
+    print(data, "DATA")
     if data.get("error"):
         await info.delete()
         return await message.answer(f"❌ Xatolik yuz berdi, qayta urinib ko'ring!\n{repr(data)}")
