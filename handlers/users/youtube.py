@@ -190,15 +190,21 @@ async def download_thumb(file_path, url):
 
 def sync_download_audio(url: str, output_path: str, proxy_config=None):
     ydl_opts = {
-        'format': 'bestaudio/best',
-        'extractaudio': True,
-        'audioformat': 'mp3',
-        'outtmpl': output_path,
+        'format': 'bestaudio',  # Faqat eng yaxshi audio formatini tanlash
+        'outtmpl': output_path,  # Faylni saqlash yo'li
+        'noplaylist': True,  # Playlist emas, faqat bitta video uchun
+        'quiet': True,  # Kamroq log chiqarish
+        'no_warnings': True,  # Ogohlantirishlar chiqarilmasin
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',  # Audio ajratish
+            'preferredcodec': 'mp3',  # MP3 formatini tanlash
+            'preferredquality': '192',  # Audio sifat darajasi (kbps)
+        }],
+        'prefer_ffmpeg': True,
     }
 
     if proxy_config:
-        proxy_url = f"http://{proxy_config['username']}:{proxy_config['password']}@{proxy_config['server'].replace('http://', '')}"
-        ydl_opts['proxy'] = proxy_url
+        ydl_opts['proxy'] = proxy_config
     # yt-dlp yordamida yuklash
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
