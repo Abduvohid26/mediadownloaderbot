@@ -192,7 +192,8 @@ async def download_thumb(file_path, url):
 
 def sync_download_audio(url: str, output_path: str, proxy_config=None):
     options = {
-            'format': 'bestaudio[ext=m4a]/best',
+            # 'format': 'bestaudio[ext=m4a]/best',
+            'format': 'worstaudio[ext=m4a]/worstaudio',
             'outtmpl': output_path,
             'noplaylist': True,
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
