@@ -109,7 +109,9 @@ async def send_audio(call, url, title, token):
     try:
         proxy_data = await _get_proxy_url(proxy_token=token)
 
-        audio_path = f"media/audio_{int(time.time())}.mp3"
+        # audio_path = f"media/audio_{int(time.time())}.mp3"
+        audio_path = f"media/audio_{int(time.time())}.m4a"
+
 
         res_path = await download_audio(url, audio_path, proxy_data)
 
@@ -189,35 +191,21 @@ async def download_thumb(file_path, url):
     return None
 
 def sync_download_audio(url: str, output_path: str, proxy_config=None):
-    # ydl_opts = {
-    #     'format': 'bestaudio',  # Faqat eng yaxshi audio formatini tanlash
-    #     'outtmpl': output_path,  # Faylni saqlash yo'li
-    #     'noplaylist': True,  # Playlist emas, faqat bitta video uchun
-    #     'quiet': True,  # Kamroq log chiqarish
-    #     'no_warnings': True,  # Ogohlantirishlar chiqarilmasin
-    #     'postprocessors': [{
-    #         'key': 'FFmpegExtractAudio',  # Audio ajratish
-    #         'preferredcodec': 'mp3',  # MP3 formatini tanlash
-    #         'preferredquality': '192',  # Audio sifat darajasi (kbps)
-    #     }],
-    #     'prefer_ffmpeg': True,
-    # }
     options = {
-            'format': 'bestaudio/best',
+            'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': output_path,
             'noplaylist': True,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+
+            # 'postprocessors': [{
+            #     'key': 'FFmpegExtractAudio',
+            #     'preferredcodec': 'm4a',
+            #     'preferredquality': '192',
+            # }],
         }
-
-
-
+    print("CONFIG", proxy_config)
     if proxy_config:
         options['proxy'] = proxy_config
-    # yt-dlp yordamida yuklash
     with yt_dlp.YoutubeDL(options) as ydl:
         ydl.extract_info(url, download=True)
 
