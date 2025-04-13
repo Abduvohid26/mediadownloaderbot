@@ -189,32 +189,71 @@ async def download_thumb(file_path, url):
     return None
 
 def sync_download_audio(url: str, output_path: str, proxy_config=None):
-    ydl_opts = {
-        'format': 'bestaudio',  # Faqat eng yaxshi audio formatini tanlash
-        'outtmpl': output_path,  # Faylni saqlash yo'li
-        'noplaylist': True,  # Playlist emas, faqat bitta video uchun
-        'quiet': True,  # Kamroq log chiqarish
-        'no_warnings': True,  # Ogohlantirishlar chiqarilmasin
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',  # Audio ajratish
-            'preferredcodec': 'mp3',  # MP3 formatini tanlash
-            'preferredquality': '192',  # Audio sifat darajasi (kbps)
-        }],
-        'prefer_ffmpeg': True,
-    }
+    # ydl_opts = {
+    #     'format': 'bestaudio',  # Faqat eng yaxshi audio formatini tanlash
+    #     'outtmpl': output_path,  # Faylni saqlash yo'li
+    #     'noplaylist': True,  # Playlist emas, faqat bitta video uchun
+    #     'quiet': True,  # Kamroq log chiqarish
+    #     'no_warnings': True,  # Ogohlantirishlar chiqarilmasin
+    #     'postprocessors': [{
+    #         'key': 'FFmpegExtractAudio',  # Audio ajratish
+    #         'preferredcodec': 'mp3',  # MP3 formatini tanlash
+    #         'preferredquality': '192',  # Audio sifat darajasi (kbps)
+    #     }],
+    #     'prefer_ffmpeg': True,
+    # }
+    options = {
+            'format': 'bestaudio/best',
+            'outtmpl': output_path,
+            'noplaylist': True,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+        }
+
+
 
     if proxy_config:
-        ydl_opts['proxy'] = proxy_config
+        options['proxy'] = proxy_config
     # yt-dlp yordamida yuklash
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    with yt_dlp.YoutubeDL(options) as ydl:
+        ydl.extract_info(url, download=True)
 
-async def download_audio(url: str, output_path: str, proxy_config: str, ):
+async def download_audio(url: str, output_path: str, proxy_config: str):
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as executor:
         await loop.run_in_executor(executor, sync_download_audio, url, output_path, proxy_config)
 
     return output_path
+
+
+
+
+
+# async def download_youtube_audio(url):
+#     options = {
+#         'format': 'bestaudio/best',
+#         'outtmpl': 'output/mp3/%(id)s.%(ext)s',
+#         'noplaylist': True,
+#         'postprocessors': [{
+#             'key': 'FFmpegExtractAudio',
+#             'preferredcodec': 'mp3',
+#             'preferredquality': '192',
+#         }],
+#     }
+#
+#     with ytd.YoutubeDL(options) as ytdl:
+#         result = ytdl.extract_info(url, download=True)
+#         file_path = f"output/mp3/{result['id']}.mp3"
+#
+#         if not os.path.exists(file_path):
+#             return None
+#
+#         return file_path
+
+
 # class YtVideoState(StatesGroup):
 #     start = State()
 
