@@ -208,7 +208,9 @@ def sync_download_audio(url: str, output_path: str, proxy_config=None):
         "audio_format": "mp3",
         "embed_thumbnail": True,
         "add_metadata": True,
-        "extract_audio": True
+        "extract_audio": True,
+        'outtmpl': output_path,
+
     }   
 
     if proxy_config:
