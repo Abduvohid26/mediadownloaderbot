@@ -202,7 +202,7 @@ def sync_download_audio(url: str, output_path: str, proxy_config=None):
         "noprogress": False,
         "nooverwrites": True,
         "no_warnings": True,
-        "format": "bestaudio/best",  # eng yaxshi mavjud audio format
+        'format': 'bestaudio[ext=m4a]/best',
         "no_playlist": True,
         "audio_format": "mp3",
         "embed_thumbnail": True,
