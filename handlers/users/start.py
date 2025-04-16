@@ -63,3 +63,12 @@ async def get_content(message: types.Message):
         await message.answer("Xatolik yuz berdi, qayta urunib ko'ring.")
     finally:
         await info.delete()
+
+
+
+# from aiogram.types import InputFile
+
+from aiogram.filters import Command
+@dp.message(Command('check'))
+async def check(msg: types.Message):
+    await msg.answer_audio(audio=types.FSInputFile(path="media/audio_1744802181.mp3"))

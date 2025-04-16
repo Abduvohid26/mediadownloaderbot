@@ -21,6 +21,7 @@ from aiogram.utils.keyboard import InlineKeyboardButton, InlineKeyboardMarkup
 import time
 
 
+
 class YtVideoState(StatesGroup):
     start = State()
 
@@ -78,14 +79,15 @@ async def get_and_send_media(call: types.CallbackQuery, state: FSMContext):
     if not media_type:
         return await call.message.answer(f"❌ {res.capitalize()} topilmadi!")
 
-    media_url = media_type.get("url")
+    media_url = medias[0].get("url")
 
     try:
         if res == "video":
-            await send_media(call, media_url, title, thumb, token, media_type)
-        elif res == "audio":
-            print("audio1")
-            await send_audio(call, media_url, title, token)
+            await send_media(call, media_url, title, thumb, token, media_type=media_type)
+        # elif res == "video":
+        #     print("audio1")
+        else:
+            await send_audio(call, media_url, title, token, media_type=media_type)
     except Exception as e:
         error = str(e)
         if "[Errno 2] No such file or directory:" in error:
@@ -102,33 +104,73 @@ async def send_media(call, url, title, thumb, token, media_type):
 
 from .get_proxy import _get_proxy_url
 
+import subprocess
 
-async def send_audio(call, url, title, token):
+async def send_audio(call, url, title, token, media_type):
     """Audio faylni yuborish va xatoliklarni ushlash"""
 
+    # try:
+    #     # proxy_data = await _get_proxy_url(proxy_token=token)
+    #
+    #
+    #     # print(call.message.chat.id, "ID")
+    #     # res_path = await download_audio(url=url,output_path=audio_path, proxy_config=proxy_data)
+    #     res_path = await  download_file(url=url, filename=audio_path, token=token)
+    #     print(res_path, "RES PATH")
+    #
+    #     try:
+    #         await call.message.answer_audio(audio=FSInputFile(res_path), caption=title)
+    #     except Exception as e:
+    #         print(f"Audio yuborishda xato: {e}")
+    #         return {"success": False, "error": f"Audio yuborishda xato: {e}"}
+    #
+    #     if os.path.exists(audio_path):
+    #         os.remove(audio_path)
+    #
+    #     return {"success": True, "message": "Audio muvaffaqiyatli yuborildi"}
+    #
+    # except Exception as e:
+    #     print(f"Xatolik yuz berdi: {e}")
+    #     return {"success": False, "error": f"Xatolik yuz berdi: {e}"}
+    file_path = f"media/{media_type['type']}_{int(time.time())}.mp4"
+
+    os.makedirs("media", exist_ok=True)
+    print("salom")
+    video_path = await download_file(url, file_path, token)
+    print(video_path, "video_path")
+    audio_path = f"media/audio_{int(time.time())}.mp3"
+    await extract_audio_on_video(video_path, audio_path)
+    if os.path.exists(audio_path):
+        await call.message.answer_audio(audio=FSInputFile(audio_path), caption=title)
+        os.remove(audio_path)
+    else:
+        await call.message.answer(text="Audio yuborishda xatolik")
+        return
+
+
+
+async def extract_audio_on_video(video_path, audio_path):
     try:
-        proxy_data = await _get_proxy_url(proxy_token=token)
+        subprocess.run([
+            "ffmpeg", "-i", video_path,
+            "-vn", "-acodec", "libmp3lame",
+            "-ab", "192k", "-ar", "44100",
+            "-y", audio_path
+        ], check=True)
+        print(f"✅ Audio saved: {audio_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Xatolik: {e}")
 
-        # audio_path = f"media/audio_{int(time.time())}.mp3"
-        audio_path = f"media/audio_{int(time.time())}.m4a"
 
 
-        res_path = await download_audio(url, audio_path, proxy_data)
 
-        try:
-            await call.message.answer_audio(audio=FSInputFile(res_path), caption=title)
-        except Exception as e:
-            print(f"Audio yuborishda xato: {e}")
-            return {"success": False, "error": f"Audio yuborishda xato: {e}"}
 
-        if os.path.exists(audio_path):
-            os.remove(audio_path)
 
-        return {"success": True, "message": "Audio muvaffaqiyatli yuborildi"}
 
-    except Exception as e:
-        print(f"Xatolik yuz berdi: {e}")
-        return {"success": False, "error": f"Xatolik yuz berdi: {e}"}
+
+
+
+
 
 async def send_downloaded_media(call, url, title, thumb, token, media_type):
     file_path = f"media/{media_type['type']}_{int(time.time())}.mp4"
@@ -168,12 +210,14 @@ async def download_file(url: str, filename: str, token) -> str:
 
         os.makedirs("media", exist_ok=True)
         async with aiofiles.open(filename, "wb") as f:
+            print("cpn")
             await f.write(content)
-
+        print("ass")
         return filename
     except Exception as e:
         print(f"❌ Fayl yuklab olishda xatolik: {e}")
         return None
+
 
 
 async def download_thumb(file_path, url):
@@ -190,35 +234,27 @@ async def download_thumb(file_path, url):
 
     return None
 
+
+
 def sync_download_audio(url: str, output_path: str, proxy_config=None):
-    # options = {
-    #         'format': 'bestaudio[ext=m4a]/best',
-    #         'outtmpl': output_path,
-    #         'noplaylist': True,
-    #         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    #     }
     options = {
-        "quiet": True,
-        "noprogress": False,
-        "nooverwrites": True,
-        "no_warnings": True,
-        'format': 'bestaudio[ext=m4a]/best',
-        "no_playlist": True,
-        "audio_format": "mp3",
-        "embed_thumbnail": True,
-        "add_metadata": True,
-        "extract_audio": True,
+        'format': 'bestaudio/best',
         'outtmpl': output_path,
+        'noplaylist': True,
+        'quiet': True,
+        'no_warnings': True,
     }
-
-
     if proxy_config:
-        options['proxy'] = proxy_config
-    print(options, "OPTIONS")
-    with yt_dlp.YoutubeDL(options) as ydl:
-        ydl.extract_info(url, download=True)
+        options["proxy"] = proxy_config
 
-async def download_audio(url: str, output_path: str, proxy_config: str):
+    with yt_dlp.YoutubeDL(options) as ydl:
+        ydl.download([url])
+    print("salom")
+
+
+
+
+async def download_audio(url: str, output_path: str, proxy_config):
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as executor:
         await loop.run_in_executor(executor, sync_download_audio, url, output_path, proxy_config)
@@ -226,7 +262,16 @@ async def download_audio(url: str, output_path: str, proxy_config: str):
     return output_path
 
 
+# async def download_audio(url: str, output_path: str, proxy_config, chat_id):
+#     loop = asyncio.get_event_loop()
+#     with ThreadPoolExecutor() as executor:
+#         download_task = loop.run_in_executor(executor, sync_download_audio, url, output_path, proxy_config)
 
+        # send_task = send_audio_(output_path, chat_id)
+
+        # await asyncio.gather(download_task, send_task)
+
+    # return output_path
 
 
 # async def download_youtube_audio(url):
