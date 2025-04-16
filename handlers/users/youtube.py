@@ -213,6 +213,7 @@ def sync_download_audio(url: str, output_path: str, proxy_config=None):
 
     if proxy_config:
         options['proxy'] = proxy_config
+    print(options, "OPTIONS")
     with yt_dlp.YoutubeDL(options) as ydl:
         ydl.extract_info(url, download=True)
 
