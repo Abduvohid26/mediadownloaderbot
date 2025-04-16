@@ -210,3 +210,63 @@ from secure_proxy import SecureProxyClient
 # import requests
 # url = ""
 # res = requests.post(url=)
+
+
+
+# import requests
+
+# url = "https://instagram-media-downlaoder.p.rapidapi.com/instagram/media/service/"
+
+# querystring = {"in_url":"https://www.instagram.com/reel/DIZD7JfiIKQ/?utm_source=ig_web_copy_link"}
+
+# headers = {
+# 	"X-RapidAPI-Key": "4a6adb31edmsh5a2e06261669117p1aaeeejsn7676eb48c8f1",
+# 	"X-RapidAPI-Host": "instagram-media-downlaoder.p.rapidapi.com"
+# }
+
+# response = requests.get(url, headers=headers, json=querystring)
+
+# print(response.json())
+
+
+# import requests
+
+# url = "https://instagram-media-downlaoder.p.rapidapi.com/instagram/media/"
+
+# querystring = {"in_url":"https://www.instagram.com/reel/DIZD7JfiIKQ/?utm_source=ig_web_copy_link"}
+
+# headers = {
+#     "X-RapidAPI-Key": "4a6adb31edmsh5a2e06261669117p1aaeeejsn7676eb48c8f1",
+#     "X-RapidAPI-Host": "instagram-media-downlaoder.p.rapidapi.com",
+# }
+
+# response = requests.request("GET", url, headers=headers, params=querystring)
+
+# print(response.text)
+
+# import requests
+
+# url = "https://instagram-media-downlaoder.p.rapidapi.com/instagram/media/service/"
+
+# payload = { "url": "https://www.instagram.com/reel/DIZD7JfiIKQ/?utm_source=ig_web_copy_link" }
+# headers = {
+# 	"x-rapidapi-key": "4a6adb31edmsh5a2e06261669117p1aaeeejsn7676eb48c8f1",
+# 	"x-rapidapi-host": "instagram-media-downlaoder.p.rapidapi.com",
+# 	"Content-Type": "application/json"
+# }
+
+# response = requests.post(url, json=payload, headers=headers)
+
+# print(response.json())
+
+import requests
+
+url = "https://videoyukla.uz/instagram/media/service/"
+url = "https://videoyukla.uz/instagram/media/service/"
+
+payload = { "url": "https://www.instagram.com/reel/DIZD7JfiIKQ/?utm_source=ig_web_copy_link" }
+
+
+response = requests.post(url, json=payload)
+
+print(response.json())

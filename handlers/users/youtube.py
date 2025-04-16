@@ -191,20 +191,26 @@ async def download_thumb(file_path, url):
     return None
 
 def sync_download_audio(url: str, output_path: str, proxy_config=None):
+    # options = {
+    #         'format': 'bestaudio[ext=m4a]/best',
+    #         'outtmpl': output_path,
+    #         'noplaylist': True,
+    #         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    #     }
     options = {
-            # 'format': 'bestaudio[ext=m4a]/best',
-            'format': 'worstaudio[ext=m4a]/worstaudio',
-            'outtmpl': output_path,
-            'noplaylist': True,
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        "quiet": True,
+        "noprogress": False,
+        "nooverwrites": True,
+        "no_warnings": True,
+        "format": "bestaudio[ext=m4a]",
+        "extract_flat": True,
+        "no_playlist": True,
+        "audio_format": "mp3",
+        "embed_thumbnail": True,
+        "add_metadata": True,
+        "extract_audio": True
+    }   
 
-            # 'postprocessors': [{
-            #     'key': 'FFmpegExtractAudio',
-            #     'preferredcodec': 'm4a',
-            #     'preferredquality': '192',
-            # }],
-        }
-    print("CONFIG", proxy_config)
     if proxy_config:
         options['proxy'] = proxy_config
     with yt_dlp.YoutubeDL(options) as ydl:
