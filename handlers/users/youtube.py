@@ -262,6 +262,47 @@ async def download_audio(url: str, output_path: str, proxy_config):
     return output_path
 
 
+
+from aiogram.filters import CommandStart
+from loader import dp, bot
+from aiogram import types, F
+import requests
+from filters.my_filter import TiktokCheckLink
+from aiogram.enums.chat_action import ChatAction
+import httpx
+from aiogram.types.input_file import InputFile, FSInputFile
+import io
+from aiogram.types import BufferedInputFile
+
+
+@dp.message(F.text, TiktokCheckLink())
+async def handle_tiktok_link(message: types.Message):
+    await message.answer("⏳ Video yuklanmoqda, iltimos kuting...")
+    url = message.text.strip()
+
+    # Yuklash holatini ko'rsatish
+    await bot.send_chat_action(message.chat.id, ChatAction.UPLOAD_VIDEO)
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+            api_url = "https://videoyukla.uz/tiktok/media"
+            response = await client.get(api_url, params={"tk_url": url})
+            data = response.json()
+            if data.get("error"):
+                await bot.send_message(message.chat.id, "Xatolik yuz berdi qayta urinib ko'ring")
+            download_url = response.json()["medias"][0]["download_url"]
+            filename = f"media/{download_url.split("/")[-1].split("?")[0]}"
+
+            video_response = await client.get(download_url)
+
+            with open(filename, "wb") as f:
+                f.write(video_response.content)
+            await bot.send_video(chat_id=message.chat.id, video=FSInputFile(filename))
+    except Exception as e:
+        await message.answer(f"❌ Kutilmagan xatolik: {str(e)}")
+
+
+
 # async def download_audio(url: str, output_path: str, proxy_config, chat_id):
 #     loop = asyncio.get_event_loop()
 #     with ThreadPoolExecutor() as executor:
