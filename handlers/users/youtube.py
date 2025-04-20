@@ -485,3 +485,43 @@ async def download_audio(url: str, output_path: str, proxy_config):
 #         print(f"❌ Thumbnail yuklab olishda xatolik: {e}")
 
 #     return None
+
+
+
+# from filters.my_filter import TiktokCheckLink
+
+# @dp.message(F.text, TiktokCheckLink())
+# async def get_video(message: types.Message):
+#     # Foydalanuvchiga xabar yuborish
+#     await message.answer("Sorov Bajarilmoqda Kuting...")
+
+#     url = message.text.strip()
+    
+#     # Chatga video yuklash statusini yuborish
+#     await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_VIDEO)
+
+#     try:
+#         # TikTok video yuklash URL'siga so'rov yuborish
+#         async with httpx.AsyncClient(timeout=80) as client:
+#             response = await client.get("https://videoyukla.uz/tiktok/media", params={"tk_url": url}, timeout=15)
+#             response.raise_for_status()  # Serverdan 4xx/5xx xatoliklarini tekshiradi
+
+#             # Javobni JSON formatida olish
+#             data = response.json()
+
+#             # Xatolikni tekshirish
+#             if data.get("error", False):
+#                 await message.answer("Xatolik yuz berdi! Qayta urinib ko'ring.")
+#                 print("Error server")
+#                 return
+
+#             # Video URL ni yuborish
+#             download_url = data["medias"][0]["download_url"]
+#             await message.answer_video(download_url)
+            
+#     except httpx.RequestError as e:
+#         await message.answer("Tarmoq xatosi yuz berdi. Iltimos, qayta urinib ko'ring.")
+#         print(f"RequestError: {e}")
+#     except Exception as e:
+#         await message.answer("Noma'lum xatolik yuz berdi.")
+#         print(f"Exception: {e}")

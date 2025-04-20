@@ -231,10 +231,10 @@ async def download_audio(url: str, output_path: str):
         print(f"❌ Boshqa xatolik: {e}")
 
 # Misol uchun test qilish:
-if __name__ == "__main__":
-    url = "https://rr4---sn-q4flrnek.googlevideo.com/videoplayback?expire=1744826291&ei=U5v_Z8KlOcG1kucPu_b6oAI&ip=2605%3A5fc2%3A73b5%3Abef5%3A4df8%3Aa731%3A6a23%3A297&id=o-AJW74LEa6uwTwFIKFV2KLdmflT3jt92ZFzlZwAVv0gJP&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1744804691%2C&mh=B4&mm=31%2C29&mn=sn-q4flrnek%2Csn-q4fl6n6s&ms=au%2Crdu&mv=m&mvi=4&pl=32&rms=au%2Cau&initcwndbps=2407500&bui=AccgBcNprv-FNDM2uMXNHYrds48j4EPhv5YrFImTD2yu9phtmgbmKJwD0t1F5E3BIm2Sq9-woW83-K_o&vprv=1&svpuc=1&mime=video%2Fmp4&ns=m5x4rv2OiH75bBzkdjvYqSgQ&rqh=1&cnr=14&ratebypass=yes&dur=604.995&lmt=1743860981674372&mt=1744804150&fvip=2&lmw=1&c=TVHTML5&sefc=1&txp=5538534&n=eKClj9xOMAsRmQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=ACuhMU0wRQIhAN1bYZHIVohFaFwMgBMzGT1qkMDiK4EwA4R-Yd7WB69wAiBSD6azI2AzH_mdOJjzWTrwE26ASypbQWvS1a69P3TG_w%3D%3D&sig=AJfQdSswRgIhAJiyPzEuRlGfMk-lwt-ayyakQV8EOplmndYMma3lc12vAiEAjy3D7zvaZcQcwJJlJjFJq4m-4iJV8Xm78ZZ05pRSqD4%3D"
-    output_path = "media/test_audio.mp4"
-    asyncio.run(download_audio(url, output_path))
+# if __name__ == "__main__":
+    # url = "https://rr4---sn-q4flrnek.googlevideo.com/videoplayback?expire=1744826291&ei=U5v_Z8KlOcG1kucPu_b6oAI&ip=2605%3A5fc2%3A73b5%3Abef5%3A4df8%3Aa731%3A6a23%3A297&id=o-AJW74LEa6uwTwFIKFV2KLdmflT3jt92ZFzlZwAVv0gJP&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1744804691%2C&mh=B4&mm=31%2C29&mn=sn-q4flrnek%2Csn-q4fl6n6s&ms=au%2Crdu&mv=m&mvi=4&pl=32&rms=au%2Cau&initcwndbps=2407500&bui=AccgBcNprv-FNDM2uMXNHYrds48j4EPhv5YrFImTD2yu9phtmgbmKJwD0t1F5E3BIm2Sq9-woW83-K_o&vprv=1&svpuc=1&mime=video%2Fmp4&ns=m5x4rv2OiH75bBzkdjvYqSgQ&rqh=1&cnr=14&ratebypass=yes&dur=604.995&lmt=1743860981674372&mt=1744804150&fvip=2&lmw=1&c=TVHTML5&sefc=1&txp=5538534&n=eKClj9xOMAsRmQ&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=ACuhMU0wRQIhAN1bYZHIVohFaFwMgBMzGT1qkMDiK4EwA4R-Yd7WB69wAiBSD6azI2AzH_mdOJjzWTrwE26ASypbQWvS1a69P3TG_w%3D%3D&sig=AJfQdSswRgIhAJiyPzEuRlGfMk-lwt-ayyakQV8EOplmndYMma3lc12vAiEAjy3D7zvaZcQcwJJlJjFJq4m-4iJV8Xm78ZZ05pRSqD4%3D"
+    # output_path = "media/test_audio.mp4"
+    # asyncio.run(download_audio(url, output_path))
 
 
 
@@ -284,14 +284,51 @@ if __name__ == "__main__":
 
 # print(response.json())
 
-import requests
+# import requests
 
-url = "https://videoyukla.uz/instagram/media/service/"
-url = "https://videoyukla.uz/instagram/media/service/"
+# url = "https://videoyukla.uz/instagram/media/service/"
+# url = "https://videoyukla.uz/instagram/media/service/"
 
-payload = { "url": "https://www.instagram.com/reel/DIZD7JfiIKQ/?utm_source=ig_web_copy_link" }
+# payload = { "url": "https://www.instagram.com/reel/DIZD7JfiIKQ/?utm_source=ig_web_copy_link" }
 
 
-response = requests.post(url, json=payload)
+# response = requests.post(url, json=payload)
 
-print(response.json())
+# print(response.json())
+
+# import requests
+
+# url = "https://youtube-media-downloader.p.rapidapi.com/v2/misc/list-items"
+
+# payload = {
+    
+# }
+# headers = {
+# 	"x-rapidapi-key": "54e518fa11msha164dc2cecb21c8p18d479jsn65ee0a8c6b70",
+# 	"x-rapidapi-host": "youtube-media-downloader.p.rapidapi.com",
+# 	"Content-Type": "application/x-www-form-urlencoded"
+# }
+
+# response = requests.post(url, data=payload, headers=headers)
+
+# print(response.json())
+
+# import yt_dlp
+
+
+# def download_tiktok_video(url):
+#     ydl_opts = {
+#         'outtmpl': '%(title)s.%(ext)s',  # Fayl nomi video nomiga qarab bo'ladi
+#         'format': 'best',  # Eng yaxshi sifatni tanlaydi
+#     }
+
+#     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#         info = ydl.extract_info(url, download=False)
+
+#     print(f"Video yuklandi: {info}")
+
+
+# # Misol uchun video URL
+# tiktok_url = 'https://vt.tiktok.com/ZSrLJ2KnQ/'
+
+# download_tiktok_video(tiktok_url)

@@ -20,3 +20,17 @@ class YtCheckLink(BaseFilter):
         )
 
         return bool(youtube_regex.match(message.text))
+
+
+
+
+class TiktokCheckLink(BaseFilter):
+    async def __call__(self, message: types.Message):
+        # TikTok URL'larining ikkalasini aniqlash uchun regex
+        pattern = r"^(https:\/\/(www\.|vt\.)?tiktok\.com\/(@[\w\.]+\/video\/\d+|Z[\w]+\/))$"
+        print("ss")
+        # URL'ni topish uchun re.search ishlatamiz
+        if re.search(pattern, message.text):
+            print("s")
+            return True
+        return False
