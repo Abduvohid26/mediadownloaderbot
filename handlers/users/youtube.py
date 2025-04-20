@@ -291,7 +291,7 @@ async def handle_tiktok_link(message: types.Message):
             if data.get("error"):
                 await bot.send_message(message.chat.id, "Xatolik yuz berdi qayta urinib ko'ring")
             download_url = response.json()["medias"][0]["download_url"]
-            filename = f"media/{download_url.split("/")[-1].split("?")[0]}"
+            filename = f"media/{download_url.split('/')[-1].split('?')[0]}"
 
             video_response = await client.get(download_url)
 
