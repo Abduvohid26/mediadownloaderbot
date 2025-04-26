@@ -1,4 +1,4 @@
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from loader import dp, bot
 from aiogram import types, F
 import requests
@@ -7,6 +7,9 @@ from aiogram.enums.chat_action import ChatAction
 
 
 
+@dp.message(Command('check'))
+async def checker(msg: types.Message):
+    await msg.answer_video(video=f"https://scontent-ams4-1.cdninstagram.com/o1/v/t16/f2/m86/AQNmd_I1bEai3xqI2JYRTtuYehu1v91snJUFYgpgA8_uiMkQPzVnaXuCAw7_agYIjuRRTQ-otYy_cr7wdwcQu4q7fGHpTnE2d38aCs0.mp4?stp=dst-mp4&efg=eyJxZV9ncm91cHMiOiJbXCJpZ193ZWJfZGVsaXZlcnlfdnRzX290ZlwiXSIsInZlbmNvZGVfdGFnIjoidnRzX3ZvZF91cmxnZW4uY2xpcHMuYzIuNzIwLmJhc2VsaW5lIn0&_nc_cat=110&vs=629398873249627_3863327341&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9GRTQ3RTIxNEFDQ0Q3Njk1NjMzNkRDRDI5RjMxNEU5OF92aWRlb19kYXNoaW5pdC5tcDQVAALIAQAVAhg6cGFzc3Rocm91Z2hfZXZlcnN0b3JlL0dLdWk2UnlpNkhkT0F0WUJBSFFTV2xRV2hLRjJicV9FQUFBRhUCAsgBACgAGAAbABUAACbk%2BNXt%2FZKWQBUCKAJDMywXQEM7peNT988YEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HAA%3D%3D&_nc_rid=d6c7c77a56&ccb=9-4&oh=00_AfHOHm0Bk_u9vv3oQ4e9qhUej9LmU5waKOSq1T0oKE2uuA&oe=680EC71A&_nc_sid=d885a2")
 
 @dp.message(CommandStart())
 async def start_bot(message:types.Message):
@@ -24,8 +27,6 @@ async def get_content(message: types.Message):
     async with httpx.AsyncClient(timeout=80) as client:
         response = await client.get("https://videoyukla.uz/instagram/media", params={"in_url": url}, timeout=15)
         data = response.json()
-
-    print(data)
     try:
         if data.get("error"):
             await message.answer("Xatolik Yuz berdi Qayta urunib ko'ring!")
